@@ -63,7 +63,8 @@ st.write("### 🎙️ Bấm micro để ghi âm")
 audio_bytes = audio_recorder(
     text="",
     icon_name="microphone",
-    icon_size="3x"
+    icon_size="3x",
+    key=f"recorder_{st.session_state.current_index}"
 )
 
 # Upload file backup
@@ -123,7 +124,5 @@ if audio_source:
 # Nút chuyển câu
 if st.button("➡️ Câu tiếp theo"):
     if st.session_state.current_index < len(sentences) - 1:
-        next_index = st.session_state.current_index + 1
-        st.session_state.clear()
-        st.session_state.current_index = next_index
+        st.session_state.current_index += 1
         st.rerun()
