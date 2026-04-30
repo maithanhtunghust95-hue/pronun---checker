@@ -5,13 +5,11 @@ from audio_recorder_streamlit import audio_recorder
 import tempfile
 import random
 
-# Kết nối OpenAI
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# Tiêu đề app
 st.title("🎤 Công cụ luyện phát âm")
 
-# Danh sách câu luyện tập
+# Danh sách câu
 sentences = [
     "Rich people focus on opportunities.",
     "Poor people focus on obstacles.",
@@ -25,7 +23,6 @@ sentences = [
     "Success comes from consistent action."
 ]
 
-# Lời khen
 compliments = [
     "🌸 BẠN LÀM TỐT LẮM!",
     "🌺 GIỎI GHÊ TA!",
@@ -33,33 +30,31 @@ compliments = [
     "💐 TIẾN BỘ RÕ LUÔN!"
 ]
 
-# Lưu trạng thái câu hiện tại
+# State
 if "current_index" not in st.session_state:
     st.session_state.current_index = 0
 
+if "scores" not in st.session_state:
+    st.session_state.scores = []
+
 current_sentence = sentences[st.session_state.current_index]
 
-# Hướng dẫn
+# UI
 st.markdown("### Hướng dẫn")
-st.write("1. Bấm vào biểu tượng micro để ghi âm.")
-st.write("2. Đọc to và rõ câu tiếng Anh bên dưới.")
-st.write("3. Xem điểm phát âm.")
-st.write("4. Bấm 'Câu tiếp theo' để chuyển câu mới.")
+st.write("1. Bấm micro để ghi âm.")
+st.write("2. Đọc to câu bên dưới.")
+st.write("3. Xem điểm và chuyển câu tiếp theo.")
 
 st.write("---")
 
-# Hiển thị số câu
 st.write(f"### Câu {st.session_state.current_index + 1}/{len(sentences)}")
 
-# Hiển thị câu target thật to
 st.markdown(
     f"<h1 style='text-align:center; font-weight:bold;'>{current_sentence}</h1>",
     unsafe_allow_html=True
 )
 
-st.write("### 🎙️ Bấm micro để ghi âm")
-
-# Ghi âm
+# Recorder (KEY QUAN TRỌNG để tránh bug)
 audio_bytes = audio_recorder(
     text="",
     icon_name="microphone",
@@ -67,20 +62,18 @@ audio_bytes = audio_recorder(
     key=f"recorder_{st.session_state.current_index}"
 )
 
-# Upload file backup
 uploaded_file = st.file_uploader(
-    "Hoặc tải file audio lên",
+    "Hoặc tải file audio",
     type=["mp3", "wav", "m4a"]
 )
 
 audio_source = None
-
 if audio_bytes:
     audio_source = audio_bytes
 elif uploaded_file:
     audio_source = uploaded_file.read()
 
-# Xử lý audio
+# Xử lý
 if audio_source:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
         tmp_file.write(audio_source)
@@ -102,17 +95,21 @@ if audio_source:
 
     score = round(similarity * 100)
 
-    # Hiển thị kết quả
+    # lưu score
+    if len(st.session_state.scores) <= st.session_state.current_index:
+        st.session_state.scores.append(score)
+    else:
+        st.session_state.scores[st.session_state.current_index] = score
+
+    # hiển thị
     st.write("## Kết quả")
     st.write("**Máy nghe được:**", transcript)
     st.write(f"**Điểm phát âm:** {score}/100")
 
-    # Feedback theo score
+    # feedback
     if score >= 80:
-        message = random.choice(compliments)
-
         st.markdown(
-            f"<h2 style='color:red; text-align:center;'>{message}</h2>",
+            f"<h2 style='color:red; text-align:center;'>{random.choice(compliments)}</h2>",
             unsafe_allow_html=True
         )
     else:
@@ -121,8 +118,34 @@ if audio_source:
             unsafe_allow_html=True
         )
 
-# Nút chuyển câu
+# Next button
 if st.button("➡️ Câu tiếp theo"):
     if st.session_state.current_index < len(sentences) - 1:
         st.session_state.current_index += 1
         st.rerun()
+
+# 🎯 HIỆN KẾT QUẢ CUỐI
+if (
+    st.session_state.current_index == len(sentences) - 1
+    and len(st.session_state.scores) == len(sentences)
+):
+    avg = round(sum(st.session_state.scores) / len(st.session_state.scores))
+
+    st.write("---")
+    st.markdown("<h1 style='text-align:center;'>🎉 HOÀN THÀNH BÀI LUYỆN 🎉</h1>", unsafe_allow_html=True)
+
+    st.markdown(
+        f"<h2 style='text-align:center; color:blue;'>Điểm trung bình: {avg}/100</h2>",
+        unsafe_allow_html=True
+    )
+
+    if avg >= 80:
+        st.markdown(
+            "<h2 style='color:red; text-align:center;'>🌸 BẠN ĐANG TIẾN BỘ RẤT TỐT!</h2>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            "<h2 style='color:orange; text-align:center;'>💪 LUYỆN THÊM CHÚT NỮA LÀ SẼ RẤT ỔN!</h2>",
+            unsafe_allow_html=True
+        )
