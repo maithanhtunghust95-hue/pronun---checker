@@ -125,6 +125,7 @@ if st.button("➡️ Câu tiếp theo"):
         st.rerun()
 
 # 🎯 HIỆN KẾT QUẢ CUỐI
+# 🎯 HIỆN KẾT QUẢ CUỐI
 if (
     st.session_state.current_index == len(sentences) - 1
     and len(st.session_state.scores) == len(sentences)
@@ -132,13 +133,17 @@ if (
     avg = round(sum(st.session_state.scores) / len(st.session_state.scores))
 
     st.write("---")
-    st.markdown("<h1 style='text-align:center;'>🎉 HOÀN THÀNH BÀI LUYỆN 🎉</h1>", unsafe_allow_html=True)
+    st.markdown(
+        "<h1 style='text-align:center;'>🎉 HOÀN THÀNH BÀI LUYỆN 🎉</h1>",
+        unsafe_allow_html=True
+    )
 
     st.markdown(
         f"<h2 style='text-align:center; color:blue;'>Điểm trung bình: {avg}/100</h2>",
         unsafe_allow_html=True
     )
 
+    # feedback cuối bài
     if avg >= 80:
         st.markdown(
             "<h2 style='color:red; text-align:center;'>🌸 BẠN ĐANG TIẾN BỘ RẤT TỐT!</h2>",
@@ -149,3 +154,14 @@ if (
             "<h2 style='color:orange; text-align:center;'>💪 LUYỆN THÊM CHÚT NỮA LÀ SẼ RẤT ỔN!</h2>",
             unsafe_allow_html=True
         )
+
+    # bảng chi tiết
+    st.write("### 📊 Chi tiết từng câu")
+
+    data = {
+        "Câu": [f"Câu {i+1}" for i in range(len(sentences))],
+        "Nội dung": sentences,
+        "Điểm": st.session_state.scores
+    }
+
+    st.table(data)
