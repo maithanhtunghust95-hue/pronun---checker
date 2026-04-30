@@ -6,25 +6,9 @@ import tempfile
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# CSS mic pulse
-st.markdown("""
-<style>
-button {
-    animation: pulse 1.2s infinite;
-    border-radius: 50%;
-}
-
-@keyframes pulse {
-    0% {transform: scale(1);}
-    50% {transform: scale(1.15);}
-    100% {transform: scale(1);}
-}
-</style>
-""", unsafe_allow_html=True)
-
 st.title("Pronunciation Checker")
 
-# Your preset sentences
+# preset sentences
 sentences = [
     "Rich people focus on opportunities.",
     "Poor people focus on obstacles.",
@@ -38,16 +22,18 @@ sentences = [
     "Success comes from consistent action."
 ]
 
-# initialize session state
+# session state
 if "current_index" not in st.session_state:
     st.session_state.current_index = 0
 
 current_sentence = sentences[st.session_state.current_index]
 
 st.write(f"### Sentence {st.session_state.current_index + 1}/{len(sentences)}")
-st.write(f"**{current_sentence}**")
+st.write(current_sentence)
 
-# recorder
+st.write("### Tap microphone to record")
+
+# recorder (keep default mic)
 audio_bytes = audio_recorder(
     text="",
     icon_name="microphone",
@@ -55,12 +41,11 @@ audio_bytes = audio_recorder(
 )
 
 uploaded_file = st.file_uploader(
-    "Or upload audio file",
+    "Or upload audio",
     type=["mp3", "wav", "m4a"]
 )
 
 audio_source = None
-
 if audio_bytes:
     audio_source = audio_bytes
 elif uploaded_file:
@@ -91,7 +76,6 @@ if audio_source:
     st.write("**Transcript:**", transcript)
     st.write(f"**Score:** {score}/100")
 
-# next button
 if st.button("Next Sentence"):
     if st.session_state.current_index < len(sentences) - 1:
         st.session_state.current_index += 1
