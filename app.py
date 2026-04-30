@@ -123,5 +123,7 @@ if audio_source:
 # Nút chuyển câu
 if st.button("➡️ Câu tiếp theo"):
     if st.session_state.current_index < len(sentences) - 1:
-        st.session_state.current_index += 1
+        next_index = st.session_state.current_index + 1
+        st.session_state.clear()
+        st.session_state.current_index = next_index
         st.rerun()
