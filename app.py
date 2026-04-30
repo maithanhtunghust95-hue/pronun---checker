@@ -46,9 +46,26 @@ st.write("2. Đọc to câu bên dưới.")
 st.write("3. Xem điểm và chuyển câu tiếp theo.")
 
 st.write("---")
-
 st.write(f"### Câu {st.session_state.current_index + 1}/{len(sentences)}")
+# Thanh tiến trình
+progress = (st.session_state.current_index + 1) / len(sentences)
+st.progress(progress)
 
+# Hiển thị điểm trung bình hiện tại
+if len(st.session_state.scores) > 0:
+    current_avg = round(
+        sum(st.session_state.scores) / len(st.session_state.scores)
+    )
+
+    st.markdown(
+        f"<h3 style='color:green;'>⭐ Điểm trung bình hiện tại: {current_avg}/100</h3>",
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown(
+        "<h3 style='color:gray;'>⭐ Chưa có điểm nào</h3>",
+        unsafe_allow_html=True
+    )
 st.markdown(
     f"<h1 style='text-align:center; font-weight:bold;'>{current_sentence}</h1>",
     unsafe_allow_html=True
